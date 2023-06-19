@@ -1,0 +1,126 @@
+﻿@page "/todo"
+@using Newtonsoft.Json;
+@using Schiavello_Technical_Challenge.IServices;
+@using Schiavello_Technical_Challenge.Models
+@using Schiavello_Technical_Challenge.Services
+@using Microsoft.AspNetCore.Components
+@using System.Text.Json
+@inject ITodoService todoService
+
+<p>API Results @ListCount</p>
+
+
+<h3>Todo</h3>
+<br/>
+
+<button class="btn btn-primary" @onclick="GetData">Refresh</button>
+<br />
+
+@if (todos != null && todos.Count > 0)
+{
+    <div class="col-sm-auto">
+        <table class="table table-hover table-striped">
+
+            <thead>
+                <tr>
+                    @*<th>ID</th>*@
+                    <th>Title</th>
+                    <th>State</th>
+                    <th>Edit</th>
+                    <th>Sort by</th>
+                    <th>Group By</th>
+
+
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var todo in todos.Select((value, i) => new { i, value }))
+                {
+                    var value = todo.value;
+                    var index = todo.i;
+                    <tr>
+
+                        <td>@value.Title</td>
+                        <td>@value.Status</td>
+
+                        <td>
+                           @* <select @bind="selectedAction" class="form-select form-select-sm" aria-label="Select"
+                            @onselectionchange="()=> {EditTodoItem(value);}">
+                                <option selected>Edit this This Todo</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Delete">Delete</option>
+                            </select>*@
+                            @*<button @onclick="()=>EditTodoItem(value)">Completed</button>*@
+                            <button class="btn btn-warning" @onclick="@(e => EditTodoItem(value, "Active"))">Active</button>
+                            <button class="btn btn-success" @onclick="@(e => EditTodoItem(value, "Completed"))">Complete</button>
+                            <button class="btn btn-danger" @onclick="@(e => DeleteTodoItem(value.Id))">Delete</button>
+
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>No todos found.</p>
+}
+
+<br/>
+<input placeholder="Something todo" @bind="newTodo" />
+<button class="btn btn-primary" @onclick="() => {AddTodoItem();}">Add New Todo</button>
+
+@code {
+    private List<TodoItem> todos { get; set; }
+    string? TestR { get; set; }
+    int ListCount { get; set; } = 0;
+    private string? newTodo;
+    private string selectedAction;
+
+    private async Task GetData()
+    {
+        todos = await todoService.GetAllTodos();
+
+        if (todos != null && todos.Count > 0)
+        {
+            ListCount = todos.Count();
+        }
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetData();
+    }
+
+
+    private async void EditTodoItem(TodoItem todo, string Status)
+    {
+
+        todo.Status = Status;
+        await todoService.UpdateTodo(todo);
+
+        await GetData();
+    }
+
+
+    private async void DeleteTodoItem(int id)
+    {
+        await todoService.DeleteTodo(id);
+        await GetData();
+    }
+    private async void AddTodoItem()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            //todos.Add(new TodoItem { Id = 0, Title = newTodo, Status = "New" });
+
+            await todoService.AddTodo(new TodoItem { Id = 0, Title = newTodo, Status = "New" });
+            newTodo = string.Empty;
+            await GetData();
+        }
+    }
+}

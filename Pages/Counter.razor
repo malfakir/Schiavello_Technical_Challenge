@@ -1,0 +1,49 @@
+﻿@page "/counter"
+
+<PageTitle>Fibonacci Counter</PageTitle>
+
+<h1>Fibonacci Counter</h1>
+
+<p>Initial Fibonacci Number: @IncrementAmount</p>
+<p>Fibonacci Number: @fibonacciNumber</p>
+
+<button class="btn btn-primary" @onclick="AddFibonacci">Increase</button>
+<button class="btn btn-primary" @onclick="SubtractFibonacci">Decrease</button>
+
+ 
+
+@code {
+
+    [Parameter]
+    public int IncrementAmount { get; set; } = 1;
+
+    private int fibonacciNumber = 0;
+    private int previousFibonacci = 0;
+    private int currentFibonacci = 1;
+
+    protected override void OnInitialized()
+    {
+        fibonacciNumber = Convert.ToInt32(IncrementAmount);
+        previousFibonacci = 0;
+        currentFibonacci = fibonacciNumber;
+    }
+
+    private void AddFibonacci() //  Fibonacci ++
+    {        
+        int temp = currentFibonacci;
+        currentFibonacci += previousFibonacci;
+        previousFibonacci = temp;
+
+        fibonacciNumber = currentFibonacci;
+        StateHasChanged();
+    }
+
+    private void SubtractFibonacci() // Fibonacci --
+    {
+        currentFibonacci = previousFibonacci;
+        previousFibonacci = fibonacciNumber - currentFibonacci;
+        fibonacciNumber = currentFibonacci;
+        StateHasChanged();
+    }
+
+}

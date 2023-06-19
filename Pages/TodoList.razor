@@ -1,0 +1,62 @@
+﻿@page "/todolist"
+@using Schiavello_Technical_Challenge.Models;
+@using Schiavello_Technical_Challenge.Services;
+@using Microsoft.AspNetCore.Components;
+@inject TodoService todoService
+@inject NavigationManager navigationManager
+
+<h3>Todo List</h3>
+
+@if (todos.Count > 0)
+{
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Is Completed</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var todo in todos)
+            {
+                <tr>
+                    <td>@todo.Id</td>
+                    <td>@todo.Title</td>
+                    @*<td>@todo.Description</td>
+                    <td>@(todo.IsCompleted ? "Yes" : "No")</td>*@
+                    <td>
+                        <button @onclick="() => EditTodoItem(todo.Id)">Edit</button>
+                        <button @onclick="() => DeleteTodoItem(todo.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No todos found.</p>
+}
+
+@code {
+    private List<TodoItem> todos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        todos = await todoService.GetAllTodos();
+    }
+
+    private void EditTodoItem(int id)
+    {
+        navigationManager.NavigateTo($"/todo/{id}");
+    }
+
+    private void DeleteTodoItem(int id)
+    {
+        todoService.DeleteTodo(id);
+        //todos = await todoService.GetAllTodos();
+    }
+}
